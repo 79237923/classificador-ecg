@@ -25,42 +25,33 @@ O motor é **o mesmo código** validado contra o PTB-XL. Verificado: as medidas
 
 ---
 
-## Situação atual
+## Situação atual — está no ar
 
 | Etapa | Estado |
 |---|---|
-| Repositório no GitHub | ✅ <https://github.com/79237923/classificador-ecg> (público) |
-| Código enviado | ✅ 92 arquivos, 10,2 MB |
-| GitHub Pages ativado | ✅ origem: GitHub Actions |
-| Site provisório | ✅ <https://79237923.github.io/classificador-ecg/> |
-| Domínio próprio | ⏳ **depende de você** — passo abaixo |
+| Repositório | ✅ <https://github.com/79237923/classificador-ecg> (público) |
+| GitHub Pages | ✅ origem: GitHub Actions, publicação automática a cada push |
+| Endereço do GitHub | ✅ <https://79237923.github.io/classificador-ecg/> |
+| Domínio próprio | ✅ **ecg.henriquerezends.com.br** |
+| Certificado HTTPS | emitido pelo GitHub após o domínio ser verificado |
+
+O CNAME `ecg` → `79237923.github.io` foi criado no DNS (RedeHost) e o arquivo
+`web/CNAME` fixa o domínio dentro do pacote publicado — sem ele, o deploy via
+Actions substituiria o conteúdo e o domínio próprio se perderia no push seguinte.
+
+O site de fotografia em `www.henriquerezends.com.br` (plataforma 46graus) segue
+intocado: o CardioLaudo vive num subdomínio separado.
 
 ---
 
-## Apontar o seu domínio (único passo pendente)
-
-Duas coisas, nesta ordem:
-
-**1. No Cloudflare**, no DNS de `henrique.rezends.com.br`, crie:
-
-| Tipo | Nome | Destino | Proxy |
-|---|---|---|---|
-| CNAME | `ecg` | `79237923.github.io` | **DNS only** (nuvem cinza) |
-
-> A nuvem precisa ficar **cinza**. Com o proxy laranja o GitHub não consegue
-> validar o domínio nem emitir o certificado. Depois que o HTTPS estiver
-> funcionando, você pode religar o proxy se quiser.
-
-**2. No GitHub**, em **Settings → Pages → Custom domain**, informe
-`ecg.henrique.rezends.com.br` e salve. Aguarde a verificação e marque
-**Enforce HTTPS** quando a opção ficar disponível (pode levar alguns minutos
-até o certificado ser emitido).
-
-Se preferir, dá para fazer o segundo passo por linha de comando:
+## Atualizar o site
 
 ```bash
-gh api -X PUT repos/79237923/classificador-ecg/pages -f cname=ecg.henrique.rezends.com.br
+git add . && git commit -m "descrição" && git push
 ```
+
+O GitHub Actions reconstrói o pacote do motor a partir do código-fonte e
+republica sozinho, em 2–3 minutos.
 
 ---
 
