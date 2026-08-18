@@ -29,3 +29,12 @@ data/ptbxl_cache.npz
 # Pesos do PyTorch (só p/ exportar). O .onnx VAI para o repositório: é ele que
 # o servidor carrega, e sem ele a hospedagem não teria o modelo.
 models/*.pt
+
+# Ambiente de teste do Pyodide (node_modules pesa e é reproduzível)
+.pyodide-teste/node_modules/
+.pyodide-teste/*.json
+!.pyodide-teste/package.json
+
+# O pacote da versão web é gerado por scripts/build_web.py — inclusive no CI,
+# para nunca ficar defasado em relação ao backend/ que o origina.
+web/cardiolaudo.zip

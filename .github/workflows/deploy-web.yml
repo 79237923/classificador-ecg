@@ -1,0 +1,58 @@
+# Publica a versão navegador no GitHub Pages a cada push na main.
+#
+# O pacote com o motor Python (web/cardiolaudo.zip) é reconstruído aqui a partir
+# do código-fonte, e não commitado pronto: assim ele nunca fica defasado em
+# relação ao backend/ que o gera.
+name: Publicar no GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        # O NeuroKit2 é necessário porque o pacote da versão web inclui os .py
+        # dele (não é instalável pelo micropip dentro do navegador).
+        run: pip install -r requirements.txt
+
+      - name: Montar o pacote do motor
+        run: python scripts/build_web.py
+
+      - name: Conferir que o pacote foi gerado
+        run: |
+          test -f web/cardiolaudo.zip || { echo "pacote não gerado"; exit 1; }
+          ls -lh web/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

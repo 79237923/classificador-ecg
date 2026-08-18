@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CardioLaudo — Análise automatizada de ECG</title>
+<meta name="description" content="Análise automatizada de eletrocardiograma que roda inteiramente no seu navegador — o exame não é enviado para nenhum servidor.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+      <path d="M2 18h6l3-8 5 14 4-10 2 4h8" fill="none" stroke="#e74c3c" stroke-width="2.4"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <h1>CardioLaudo</h1>
+      <span class="tagline">Análise automatizada de eletrocardiograma</span>
+    </div>
+  </div>
+  <span id="engine-badge" class="badge">carregando…</span>
+</header>
+
+<div class="disclaimer" role="note">
+  ⚠ <strong>Ambiente de teste.</strong> Ferramenta em validação, não registrada na
+  ANVISA. Não substitui laudo médico — não use com dados reais de paciente.
+</div>
+
+<main>
+  <section class="card privacidade">
+    <strong>Seu exame não sai deste computador.</strong> Toda a análise roda dentro
+    do seu navegador; nenhum arquivo é enviado a servidor algum. Por isso a
+    primeira visita precisa baixar as bibliotecas de cálculo (cerca de 30 MB) —
+    depois elas ficam em cache.
+  </section>
+
+  <section class="card" id="carregando-card">
+    <h2>Preparando o motor de análise</h2>
+    <div class="barra"><div id="barra-progresso"></div></div>
+    <p id="carregando-status" class="hint">iniciando…</p>
+  </section>
+
+  <section class="card" id="upload-card" hidden>
+    <h2>1 · Enviar exame</h2>
+    <div id="dropzone" class="dropzone" tabindex="0">
+      <p><strong>Arraste o arquivo aqui</strong> ou clique para selecionar</p>
+      <p class="hint">Sinal digital: <code>.csv</code> · <code>.txt</code>
+         &nbsp;|&nbsp; Imagem do traçado: <code>.png</code> · <code>.jpg</code> · <code>.pdf</code></p>
+      <input type="file" id="file-input" hidden
+             accept=".csv,.txt,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp,.pdf">
+    </div>
+
+    <div class="exemplos">
+      <span class="hint">Sem um ECG à mão? Teste com um exemplo:</span>
+      <button class="btn-mini" data-exemplo="ecg12_laudo_baixa.png">Laudo 12 derivações (imagem)</button>
+      <button class="btn-mini" data-exemplo="ecg_normal_12d.csv">Sinal digital normal</button>
+      <button class="btn-mini" data-exemplo="ecg_taquicardia.csv">Taquicardia</button>
+      <button class="btn-mini" data-exemplo="ecg_irregular.csv">Ritmo irregular</button>
+    </div>
+
+    <div class="form-row">
+      <label>Idade <input type="number" id="idade" min="0" max="120" placeholder="—"></label>
+      <label>Sexo
+        <select id="sexo">
+          <option value="">—</option>
+          <option value="f">Feminino</option>
+          <option value="m">Masculino</option>
+        </select>
+      </label>
+      <button id="analyze-btn" disabled>Analisar ECG</button>
+    </div>
+    <p id="file-label" class="hint"></p>
+    <p id="status" class="status" hidden></p>
+  </section>
+
+  <section class="card" id="results" hidden>
+    <div class="results-head">
+      <h2>2 · Resultado</h2>
+      <div>
+        <span id="analysis-meta" class="hint"></span>
+        <button id="pdf-btn" class="btn-secondary">Baixar laudo (PDF)</button>
+      </div>
+    </div>
+
+    <p id="summary" class="summary"></p>
+
+    <h3>Traçado analisado (<span id="lead-name">—</span>)</h3>
+    <div class="ecg-wrap"><canvas id="ecg-canvas" height="220"></canvas></div>
+
+    <h3>Medidas</h3>
+    <div id="measurements" class="metrics"></div>
+
+    <h3>Achados</h3>
+    <ul id="findings" class="findings"></ul>
+
+    <div id="st-section" hidden>
+      <h3>Desvio de ST por derivação</h3>
+      <div id="st-grid" class="metrics"></div>
+    </div>
+
+    <details id="quality-details">
+      <summary>Observações técnicas</summary>
+      <ul id="quality-list"></ul>
+    </details>
+
+    <p class="fineprint" id="disclaimer-text">
+      Resultado gerado por software de análise automatizada, destinado a apoio à
+      decisão clínica. NÃO constitui laudo médico nem substitui a interpretação
+      por médico habilitado. Achados críticos exigem confirmação médica imediata.
+    </p>
+  </section>
+</main>
+
+<footer>
+  CardioLaudo · roda no seu navegador via
+  <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> ·
+  <span id="ver">—</span>
+</footer>
+
+<!-- Versão fixada: é a mesma testada em .pyodide-teste/, onde confirmamos que
+     opencv, pywavelets, pydantic e o NeuroKit2 funcionam. Atualizar sem
+     retestar pode quebrar a análise. -->
+<script src="https://cdn.jsdelivr.net/pyodide/v314.0.5/full/pyodide.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
