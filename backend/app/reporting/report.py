@@ -131,9 +131,26 @@ def build_pdf(result: dict) -> bytes:
             el.append(Paragraph(f'{escape(str(p["label"]))}: {p["probability"] * 100:.0f}%',
                                 styles["Normal"]))
 
-    el += [Spacer(1, 4 * mm),
-           Paragraph(f"<b>Conclusão automatizada:</b> {escape(str(result['summary']))}",
-                     styles["Normal"]),
-           Spacer(1, 6 * mm), Paragraph(DISCLAIMER, warn)]
+    # Conclusão narrativa, no formato de um laudo eletrocardiográfico. É a parte
+    # que um médico lê primeiro, então vem antes da linha-resumo técnica.
+    narr = result.get("narrativa")
+    if narr:
+        el += [Spacer(1, 5 * mm),
+               Paragraph("<b>Conclusão do laudo</b>", styles["Heading3"])]
+        for secao in narr.get("secoes", []):
+            el.append(Paragraph(
+                f'<b>{escape(str(secao.get("titulo", "")))}:</b> '
+                f'{escape(str(secao.get("texto", "")))}', styles["Normal"]))
+            el.append(Spacer(1, 1.5 * mm))
+        if narr.get("conclusao"):
+            el += [Spacer(1, 2 * mm),
+                   Paragraph(f'<b>{escape(str(narr["conclusao"]))}</b>',
+                             styles["Normal"])]
+    else:
+        el += [Spacer(1, 4 * mm),
+               Paragraph(f"<b>Conclusão automatizada:</b> "
+                         f"{escape(str(result['summary']))}", styles["Normal"])]
+
+    el += [Spacer(1, 6 * mm), Paragraph(DISCLAIMER, warn)]
     doc.build(el)
     return buf.getvalue()

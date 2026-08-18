@@ -15,6 +15,7 @@ import sys
 
 sys.path.insert(0, "/cardiolaudo")
 
+from backend.app.classification.narrative import narrativa  # noqa: E402
 from backend.app.classification.rules import classify, summarize  # noqa: E402
 from backend.app.ingestion.image_digitizer import digitize  # noqa: E402
 from backend.app.ingestion.loaders import load_digital  # noqa: E402
@@ -99,6 +100,7 @@ def analisar(nome_arquivo: str, dados_b64: str,
         "achados": [{"code": f.code, "label": f.label, "severity": f.severity,
                      "criteria": f.criteria, "detail": f.detail} for f in achados],
         "resumo": summarize(achados, a),
+        "narrativa": narrativa(a, achados),
         "avisos": list(a.quality_warnings) + list(registro.notes),
         "preview": _preview(a, registro),
     }, ensure_ascii=False)
@@ -126,6 +128,7 @@ def gerar_pdf(resultado_json: str) -> str:
         },
         "findings": r.get("achados", []),
         "summary": r.get("resumo", ""),
+        "narrativa": r.get("narrativa"),
         "deep_learning": None,
     }
     return base64.b64encode(build_pdf(payload)).decode("ascii")

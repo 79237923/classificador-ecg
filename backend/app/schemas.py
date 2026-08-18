@@ -54,5 +54,8 @@ class AnalysisResult(BaseModel):
     findings: list[Finding]
     deep_learning: Optional[list[DeepPrediction]] = None
     summary: str
+    # Conclusão narrativa no formato de laudo (ritmo, intervalos, eixo,
+    # repolarização e impressão). Gerada deterministicamente das medidas.
+    narrativa: Optional[dict] = None
     disclaimer: str
     preview: Optional[list[SignalPreview]] = None

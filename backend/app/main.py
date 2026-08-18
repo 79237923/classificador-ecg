@@ -29,6 +29,7 @@ from .auth.routes import router as auth_router
 from .auth.routes import usuario_atual
 from .auth.service import User
 from .classification import deep_model
+from .classification.narrative import narrativa
 from .classification.rules import classify, summarize
 from .ingestion.image_digitizer import digitize
 from .ingestion.loaders import load_digital
@@ -231,6 +232,7 @@ async def analyze_ecg(
         findings=findings,
         deep_learning=dl,
         summary=summarize(findings, analysis),
+        narrativa=narrativa(analysis, findings),
         disclaimer=DISCLAIMER,
         preview=preview,
     )

@@ -187,6 +187,18 @@ function render(r) {
   sum.textContent = r.resumo;
   sum.classList.toggle("critical", critico);
 
+  // Conclusão narrativa, no formato de um laudo eletrocardiográfico.
+  const n = r.narrativa;
+  $("laudo").hidden = !n;
+  if (n) {
+    $("laudo-secoes").innerHTML = n.secoes.map((s) =>
+      `<p class="laudo-secao"><span class="rotulo">${esc(s.titulo)}</span>${esc(s.texto)}</p>`
+    ).join("");
+    const conc = $("laudo-conclusao");
+    conc.textContent = n.conclusao;
+    conc.classList.toggle("critical", critico);
+  }
+
   const m = r.medidas;
   const cartoes = [
     ["Freq. cardíaca", f(m.fc), "bpm"], ["RR médio", f(m.rr), "ms"],
@@ -232,6 +244,31 @@ function render(r) {
 
   $("results").scrollIntoView({ behavior: "smooth" });
 }
+
+// Copiar o texto do laudo — o uso mais provável é colar num prontuário.
+$("copiar-btn").addEventListener("click", async () => {
+  if (!ultimoResultado?.narrativa) return;
+  const n = ultimoResultado.narrativa;
+  const texto = [
+    `CardioLaudo — análise automatizada de ECG`,
+    `Arquivo: ${ultimoResultado.arquivo}`,
+    "",
+    ...n.secoes.map((s) => `${s.titulo}: ${s.texto}`),
+    "",
+    n.conclusao,
+    "",
+    "Gerado por software de apoio à decisão clínica. Não substitui laudo médico.",
+  ].join("\n");
+  try {
+    await navigator.clipboard.writeText(texto);
+    const ok = $("copiar-ok");
+    ok.hidden = false;
+    setTimeout(() => { ok.hidden = true; }, 2000);
+  } catch {
+    // clipboard bloqueado (contexto sem HTTPS, por exemplo): mostra para copiar à mão
+    window.prompt("Copie o texto do laudo:", texto);
+  }
+});
 
 // ---------------------------------------------------------------- laudo em PDF
 $("pdf-btn").addEventListener("click", async () => {
