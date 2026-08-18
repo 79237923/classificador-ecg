@@ -1,0 +1,41 @@
+# Blueprint do Render — cria o serviço já configurado ao conectar o repositório.
+#
+# As variáveis marcadas com sync:false NÃO ficam neste arquivo: você as preenche
+# no painel do Render. É o que impede a chave de cifragem e a senha do
+# administrador de irem parar no GitHub.
+services:
+  - type: web
+    name: cardiolaudo
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: CARDIOLAUDO_ENV
+        value: producao
+
+      # Chave de cifragem (base64, 32 bytes). Gere com:
+      #   python scripts/manage_keys.py gerar
+      # ATENÇÃO: no plano gratuito o disco é efêmero — o banco é recriado a cada
+      # deploy. Mantenha a MESMA chave entre deploys mesmo assim: trocá-la
+      # tornaria ilegível qualquer dado que porventura sobreviva.
+      - key: CARDIOLAUDO_KEY
+        sync: false
+
+      # Conta administradora criada automaticamente quando o banco está vazio.
+      - key: CARDIOLAUDO_ADMIN_EMAIL
+        sync: false
+      - key: CARDIOLAUDO_ADMIN_SENHA
+        sync: false
+      - key: CARDIOLAUDO_ADMIN_NOME
+        value: Henrique Rezende
+
+      # Origens autorizadas do frontend. Ajuste para o domínio final.
+      - key: CARDIOLAUDO_ORIGINS
+        value: https://ecg.henrique.rezends.com.br
+
+      # O Render encerra a conexão TLS antes da aplicação; sem isto o limite por
+      # origem contaria todos os acessos como vindos do mesmo IP interno.
+      - key: CARDIOLAUDO_TRUST_PROXY
+        value: "1"

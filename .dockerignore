@@ -1,0 +1,25 @@
+# Ambiente local e caches
+.venv/
+__pycache__/
+*.pyc
+.git/
+
+# Dados locais — NUNCA vão para a imagem. O banco cifrado, a chave e a trilha
+# de auditoria da máquina de desenvolvimento não devem viajar para o servidor.
+data/
+secrets/
+*.key
+
+# Dataset de treino (1,7 GB) e cache
+data/ptbxl/
+data/ptbxl_raw/
+data/ptbxl.zip
+data/ptbxl_cache.npz
+
+# Pesos do PyTorch: o servidor usa apenas o .onnx
+models/*.pt
+
+# Scripts de desenvolvimento, treino e teste não vão para produção
+scripts/
+requirements-dev.txt
+README.md

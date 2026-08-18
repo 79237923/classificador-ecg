@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------------------
+# NUNCA versionar: chaves e dados. Um repositório com a chave de cifragem junto
+# do banco anula a cifragem por completo — e um repositório privado pode virar
+# público por engano.
+# ---------------------------------------------------------------------------
+secrets/
+*.key
+*.key.anterior-*
+.env
+.env.*
+
+data/
+!data/samples/
+data/samples/*.csv
+!data/samples/ecg12_laudo_baixa.png
+!data/samples/ecg_normal_imagem.png
+
+# Ambiente local
+.venv/
+__pycache__/
+*.pyc
+
+# Dataset de treino (1,7 GB) e artefatos de treino
+data/ptbxl/
+data/ptbxl_raw/
+data/ptbxl.zip
+data/ptbxl_cache.npz
+
+# Pesos do PyTorch (só p/ exportar). O .onnx VAI para o repositório: é ele que
+# o servidor carrega, e sem ele a hospedagem não teria o modelo.
+models/*.pt

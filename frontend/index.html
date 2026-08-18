@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CardioLaudo — Análise automatizada de ECG</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+      <path d="M2 18h6l3-8 5 14 4-10 2 4h8" fill="none" stroke="#e74c3c" stroke-width="2.4"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <h1>CardioLaudo</h1>
+      <span class="tagline">Análise automatizada de eletrocardiograma</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="user-chip" class="user-chip" hidden></span>
+    <button id="admin-btn" class="btn-ghost" hidden>Administração</button>
+    <button id="senha-btn" class="btn-ghost" hidden>Alterar senha</button>
+    <button id="logout-btn" class="btn-ghost" hidden>Sair</button>
+    <span id="engine-badge" class="badge">motor —</span>
+  </div>
+</header>
+
+<div id="modal-senha" class="modal" hidden>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Alterar senha</h2>
+      <button class="modal-close" data-close="modal-senha" aria-label="Fechar">×</button>
+    </div>
+    <form id="senha-form" autocomplete="off">
+      <label>Senha atual
+        <input type="password" id="senha-atual" required autocomplete="current-password">
+      </label>
+      <label>Nova senha (mín. 12 caracteres, letras e números)
+        <input type="password" id="senha-nova" required autocomplete="new-password">
+      </label>
+      <label>Confirme a nova senha
+        <input type="password" id="senha-conf" required autocomplete="new-password">
+      </label>
+      <button type="submit">Salvar nova senha</button>
+    </form>
+    <p id="senha-status" class="status" hidden></p>
+    <p class="hint">Ao trocar a senha, as suas outras sessões (outros
+       dispositivos) são encerradas por segurança.</p>
+  </div>
+</div>
+
+<div id="modal-admin" class="modal" hidden>
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <h2>Administração de contas</h2>
+      <button class="modal-close" data-close="modal-admin" aria-label="Fechar">×</button>
+    </div>
+
+    <details id="admin-novo" open>
+      <summary>Cadastrar novo usuário</summary>
+      <form id="admin-form" autocomplete="off" class="admin-grid">
+        <label>E-mail<input type="email" id="admin-email" required></label>
+        <label>Nome completo<input type="text" id="admin-nome" required></label>
+        <label>Registro (CRM)<input type="text" id="admin-crm"></label>
+        <label>Papel
+          <select id="admin-papel">
+            <option value="medico">Médico</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </label>
+        <label>Senha inicial<input type="password" id="admin-senha" required autocomplete="new-password"></label>
+        <button type="submit">Criar conta</button>
+      </form>
+      <p id="admin-status" class="status" hidden></p>
+    </details>
+
+    <h3>Contas cadastradas</h3>
+    <div class="tabela-wrap">
+      <table id="admin-tabela">
+        <thead><tr><th>E-mail</th><th>Nome</th><th>Papel</th><th>Ativo</th><th>Último acesso</th><th>Ações</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="disclaimer" role="note">
+  ⚠ Ferramenta de <strong>apoio à decisão clínica em validação</strong>. Não substitui laudo médico.
+  Achados críticos exigem confirmação médica imediata.
+</div>
+
+<main>
+  <section class="card login-card" id="login-card" hidden>
+    <h2>Acesso restrito a profissionais de saúde</h2>
+    <p class="hint">Este sistema processa dados de saúde. O acesso é individual e
+       registrado em trilha de auditoria.</p>
+    <form id="login-form" autocomplete="on">
+      <label>E-mail
+        <input type="email" id="login-email" required autocomplete="username">
+      </label>
+      <label>Senha
+        <input type="password" id="login-senha" required autocomplete="current-password">
+      </label>
+      <button type="submit" id="login-btn">Entrar</button>
+    </form>
+    <p id="login-status" class="status error" hidden></p>
+    <p class="hint">Não tem conta? O administrador do sistema cria contas com
+       <code>python scripts/manage_users.py criar</code>.</p>
+  </section>
+
+  <section class="card" id="upload-card" hidden>
+    <h2>1 · Enviar exame</h2>
+    <div id="dropzone" class="dropzone" tabindex="0">
+      <p><strong>Arraste o arquivo aqui</strong> ou clique para selecionar</p>
+      <p class="hint">Sinal digital: <code>.csv</code> · <code>.txt</code> · <code>.zip</code> (WFDB/PhysioNet)
+         &nbsp;|&nbsp; Imagem do traçado: <code>.png</code> · <code>.jpg</code> · <code>.pdf</code></p>
+      <input type="file" id="file-input" hidden
+             accept=".csv,.txt,.zip,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp,.pdf">
+    </div>
+    <div class="form-row">
+      <label>Freq. de amostragem (CSV/TXT)
+        <input type="number" id="fs" value="500" min="50" max="4000"> Hz
+      </label>
+      <label>Idade <input type="number" id="age" min="0" max="120" placeholder="—"></label>
+      <label>Sexo
+        <select id="sex">
+          <option value="">—</option>
+          <option value="f">Feminino</option>
+          <option value="m">Masculino</option>
+        </select>
+      </label>
+      <button id="analyze-btn" disabled>Analisar ECG</button>
+    </div>
+    <p id="file-label" class="hint"></p>
+    <p id="status" class="status" hidden></p>
+  </section>
+
+  <section class="card" id="results" hidden>
+    <div class="results-head">
+      <h2>2 · Resultado</h2>
+      <div>
+        <span id="analysis-meta" class="hint"></span>
+        <a id="pdf-btn" class="btn-secondary" href="#" download>Baixar laudo (PDF)</a>
+      </div>
+    </div>
+
+    <p id="summary" class="summary"></p>
+
+    <h3>Traçado analisado (<span id="lead-name">—</span>)</h3>
+    <div class="ecg-wrap"><canvas id="ecg-canvas" height="220"></canvas></div>
+
+    <h3>Medidas</h3>
+    <div id="measurements" class="metrics"></div>
+
+    <h3>Achados</h3>
+    <ul id="findings" class="findings"></ul>
+
+    <div id="dl-section" hidden>
+      <h3>Classificador por deep learning (PTB-XL)</h3>
+      <div id="dl-bars"></div>
+    </div>
+
+    <details id="quality-details">
+      <summary>Qualidade e observações técnicas</summary>
+      <ul id="quality-list"></ul>
+    </details>
+
+    <p id="disclaimer-text" class="fineprint"></p>
+  </section>
+</main>
+
+<footer>CardioLaudo v<span id="ver">—</span> · uso investigacional · registros auditados localmente</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>

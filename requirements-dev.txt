@@ -1,0 +1,15 @@
+# Dependências de DESENVOLVIMENTO — treinar o modelo, exportar para ONNX e
+# rodar as validações contra o PTB-XL. NADA aqui é necessário em produção.
+#
+#   pip install -r requirements.txt -r requirements-dev.txt
+#
+# O PyTorch existe apenas para treinar (scripts/train_ptbxl.py) e converter
+# (scripts/export_onnx.py). O servidor usa somente o ONNX Runtime.
+-r requirements.txt
+
+torch
+onnx
+onnxscript
+pandas
+scikit-learn
+tqdm

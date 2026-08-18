@@ -1,0 +1,21 @@
+# Dependências de PRODUÇÃO (o que o servidor precisa para rodar).
+# Instale com: pip install -r requirements.txt
+fastapi
+uvicorn[standard]
+python-multipart
+numpy
+scipy
+neurokit2
+wfdb
+opencv-python-headless
+pymupdf
+pydantic-settings
+reportlab
+cryptography
+
+# Inferência do classificador. ONNX Runtime (~25 MB) em vez de PyTorch (~2,8 GB):
+# o modelo é convertido uma vez por scripts/export_onnx.py e o servidor carrega
+# models/ptbxl_resnet.onnx. Sem este pacote o sistema segue funcionando — só o
+# motor de critérios clínicos responde, que é quem produz todas as medidas e
+# achados do laudo.
+onnxruntime

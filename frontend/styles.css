@@ -1,0 +1,174 @@
+:root {
+  --navy: #123a5c;
+  --navy-dark: #0c2b46;
+  --accent: #e74c3c;
+  --bg: #f2f5f8;
+  --card: #ffffff;
+  --ink: #1d2b36;
+  --muted: #5c6f7f;
+  --line: #d7e0e8;
+  --ok: #1e8449;
+  --warn: #b9770e;
+  --bad: #c0392b;
+  --lim: #7d6608;
+}
+
+* { box-sizing: border-box; }
+
+/* O atributo `hidden` precisa vencer qualquer regra de display do autor.
+   Sem isto, `button { display: inline-block }` torna visível um botão marcado
+   como hidden — foi o que expôs o botão "Sair" fora de uma sessão ativa. */
+[hidden] { display: none !important; }
+body {
+  margin: 0; color: var(--ink); background: var(--bg);
+  font: 15px/1.5 "Segoe UI", system-ui, sans-serif;
+}
+
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+  color: #fff; padding: 14px 28px;
+}
+.brand { display: flex; gap: 12px; align-items: center; }
+.brand h1 { margin: 0; font-size: 20px; letter-spacing: .4px; }
+.tagline { font-size: 12px; opacity: .8; }
+.badge {
+  font-size: 11px; background: rgba(255,255,255,.15);
+  padding: 4px 10px; border-radius: 999px;
+}
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.user-chip { font-size: 12px; opacity: .92; }
+.btn-ghost {
+  background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.45);
+  border-radius: 8px; padding: 5px 12px; font-size: 12px; cursor: pointer;
+}
+.btn-ghost:hover { background: rgba(255,255,255,.14); }
+
+.login-card { max-width: 430px; margin: 40px auto; }
+.login-card form { display: grid; gap: 14px; margin-top: 16px; }
+.login-card label { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: var(--muted); }
+.login-card input { width: 100%; }
+.login-card button { width: 100%; }
+
+.disclaimer {
+  background: #fdf3e2; border-bottom: 1px solid #f0d9a8;
+  color: #7a5b12; padding: 8px 28px; font-size: 13px;
+}
+
+main { max-width: 980px; margin: 24px auto 60px; padding: 0 16px; display: grid; gap: 20px; }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: 22px 26px; box-shadow: 0 2px 8px rgba(18,58,92,.06);
+}
+.card h2 { margin: 0 0 14px; font-size: 17px; color: var(--navy); }
+.card h3 { margin: 22px 0 8px; font-size: 14px; color: var(--navy); text-transform: uppercase; letter-spacing: .5px; }
+
+.dropzone {
+  border: 2px dashed var(--line); border-radius: 10px; padding: 30px;
+  text-align: center; cursor: pointer; transition: all .15s;
+}
+.dropzone:hover, .dropzone.drag { border-color: var(--navy); background: #eef4f9; }
+.dropzone p { margin: 4px 0; }
+.hint { color: var(--muted); font-size: 12.5px; }
+code { background: #eef2f5; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+.form-row { display: flex; flex-wrap: wrap; gap: 18px; align-items: end; margin-top: 16px; }
+.form-row label { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+input, select {
+  padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; width: 110px;
+}
+button, .btn-secondary {
+  background: var(--navy); color: #fff; border: 0; border-radius: 8px;
+  padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer;
+  text-decoration: none; display: inline-block;
+}
+button:disabled { background: #9fb4c6; cursor: not-allowed; }
+button:not(:disabled):hover { background: var(--navy-dark); }
+.btn-secondary { background: #fff; color: var(--navy); border: 1.5px solid var(--navy); padding: 8px 16px; }
+
+.status { padding: 10px 14px; border-radius: 8px; background: #eef4f9; }
+.status.error { background: #fdecea; color: var(--bad); }
+
+.results-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.summary {
+  font-size: 15.5px; font-weight: 600; padding: 12px 16px; border-radius: 8px;
+  background: #eef4f9; border-left: 4px solid var(--navy);
+}
+.summary.critical { background: #fdecea; border-left-color: var(--bad); color: var(--bad); }
+
+.ecg-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: #fffdfa; }
+#ecg-canvas { display: block; }
+
+.metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.metric { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.metric .k { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+.metric .v { font-size: 19px; font-weight: 700; color: var(--navy); }
+.metric .v small { font-size: 12px; font-weight: 400; color: var(--muted); }
+
+.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.findings li { border: 1px solid var(--line); border-left-width: 5px; border-radius: 8px; padding: 10px 14px; }
+.findings .sev { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.findings li.normal   { border-left-color: var(--ok); }   .findings li.normal .sev { color: var(--ok); }
+.findings li.limitrofe{ border-left-color: var(--lim); }  .findings li.limitrofe .sev { color: var(--lim); }
+.findings li.anormal  { border-left-color: var(--warn); } .findings li.anormal .sev { color: var(--warn); }
+.findings li.critico  { border-left-color: var(--bad); background: #fff5f4; } .findings li.critico .sev { color: var(--bad); }
+.findings .crit { font-size: 12px; color: var(--muted); }
+
+#dl-bars { display: grid; gap: 6px; max-width: 480px; }
+.dl-row { display: grid; grid-template-columns: 220px 1fr 48px; gap: 10px; align-items: center; font-size: 13px; }
+.dl-bar { height: 10px; border-radius: 5px; background: #e3ebf1; overflow: hidden; }
+.dl-bar > div { height: 100%; background: var(--navy); }
+
+details { margin-top: 18px; font-size: 13px; color: var(--muted); }
+.fineprint { font-size: 11.5px; color: #8a6d1a; background: #fdf8ea; padding: 10px 14px; border-radius: 8px; margin-top: 18px; }
+
+footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px; }
+
+/* ---------- modais (troca de senha, administração) ---------- */
+.modal {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(12, 27, 42, .55);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 40px 16px; overflow-y: auto;
+}
+.modal-box {
+  background: var(--card); border-radius: 12px; width: 100%; max-width: 460px;
+  padding: 22px 26px; box-shadow: 0 12px 40px rgba(12,27,42,.3);
+}
+.modal-wide { max-width: 860px; }
+.modal-head { display: flex; justify-content: space-between; align-items: center; }
+.modal-head h2 { margin: 0; font-size: 18px; color: var(--navy); }
+.modal-close {
+  background: transparent; border: 0; font-size: 26px; line-height: 1;
+  color: var(--muted); cursor: pointer; padding: 0 4px;
+}
+.modal-close:hover { color: var(--bad); }
+.modal form { display: grid; gap: 14px; margin-top: 16px; }
+.modal label { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: var(--muted); }
+.modal input, .modal select { width: 100%; }
+.modal form button { width: 100%; }
+
+.admin-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px;
+}
+.admin-grid button { grid-column: 1 / -1; width: auto; justify-self: start; padding: 8px 20px; }
+.admin-grid label { width: auto; }
+details#admin-novo { margin-top: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+details#admin-novo summary { cursor: pointer; font-weight: 600; color: var(--navy); }
+
+.tabela-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; margin-top: 8px; }
+#admin-tabela { width: 100%; border-collapse: collapse; font-size: 13px; }
+#admin-tabela th, #admin-tabela td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+#admin-tabela th { background: #f2f6f9; color: var(--navy); font-size: 11.5px; text-transform: uppercase; letter-spacing: .4px; }
+#admin-tabela tr.inativa { opacity: .5; }
+#admin-tabela .acoes { display: flex; gap: 6px; }
+.btn-mini {
+  font-size: 11.5px; padding: 4px 9px; border-radius: 6px; border: 1px solid var(--line);
+  background: #fff; color: var(--navy); cursor: pointer;
+}
+.btn-mini:hover { background: #eef4f9; }
+.btn-mini.perigo { color: var(--bad); border-color: #e9c4c0; }
+.chip-papel { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #eef4f9; color: var(--navy); }
+.chip-papel.admin { background: #123a5c; color: #fff; }
+.status.ok { background: #e7f4ec; color: var(--ok); }
