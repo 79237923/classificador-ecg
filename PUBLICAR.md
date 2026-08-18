@@ -25,56 +25,50 @@ O motor é **o mesmo código** validado contra o PTB-XL. Verificado: as medidas
 
 ---
 
-## 1. Enviar para o GitHub
+## Situação atual
 
-Crie um repositório em <https://github.com/new>. Ele precisa ser **público**
-para o GitHub Pages funcionar no plano gratuito.
-
-```bash
-git remote add origin https://github.com/SEU-USUARIO/cardiolaudo.git
-```
-
-```bash
-git branch -M main && git push -u origin main
-```
+| Etapa | Estado |
+|---|---|
+| Repositório no GitHub | ✅ <https://github.com/79237923/classificador-ecg> (público) |
+| Código enviado | ✅ 92 arquivos, 10,2 MB |
+| GitHub Pages ativado | ✅ origem: GitHub Actions |
+| Site provisório | ✅ <https://79237923.github.io/classificador-ecg/> |
+| Domínio próprio | ⏳ **depende de você** — passo abaixo |
 
 ---
 
-## 2. Ativar o GitHub Pages
+## Apontar o seu domínio (único passo pendente)
 
-No repositório: **Settings → Pages → Source: GitHub Actions**.
+Duas coisas, nesta ordem:
 
-O arquivo `.github/workflows/deploy-web.yml` já está no projeto. Ele reconstrói
-o pacote do motor a partir do código-fonte a cada push — assim a versão web
-nunca fica defasada em relação ao `backend/`.
-
-O primeiro deploy leva 2–3 minutos. O endereço sai como
-`https://SEU-USUARIO.github.io/cardiolaudo/`.
-
----
-
-## 3. Apontar o seu domínio
-
-No repositório: **Settings → Pages → Custom domain**, informe
-`ecg.henrique.rezends.com.br` e salve. Isso cria um arquivo `CNAME` no repo.
-
-No Cloudflare, no DNS de `henrique.rezends.com.br`:
+**1. No Cloudflare**, no DNS de `henrique.rezends.com.br`, crie:
 
 | Tipo | Nome | Destino | Proxy |
 |---|---|---|---|
-| CNAME | `ecg` | `SEU-USUARIO.github.io` | **DNS only** (nuvem cinza) |
+| CNAME | `ecg` | `79237923.github.io` | **DNS only** (nuvem cinza) |
 
-> Mantenha o proxy **desligado**: com a nuvem laranja o GitHub não consegue
-> emitir o certificado. Depois que o HTTPS estiver ativo, marque
-> **Enforce HTTPS** nas configurações do Pages.
+> A nuvem precisa ficar **cinza**. Com o proxy laranja o GitHub não consegue
+> validar o domínio nem emitir o certificado. Depois que o HTTPS estiver
+> funcionando, você pode religar o proxy se quiser.
+
+**2. No GitHub**, em **Settings → Pages → Custom domain**, informe
+`ecg.henrique.rezends.com.br` e salve. Aguarde a verificação e marque
+**Enforce HTTPS** quando a opção ficar disponível (pode levar alguns minutos
+até o certificado ser emitido).
+
+Se preferir, dá para fazer o segundo passo por linha de comando:
+
+```bash
+gh api -X PUT repos/79237923/classificador-ecg/pages -f cname=ecg.henrique.rezends.com.br
+```
 
 ---
 
-## 4. Conferir
+## Conferir
 
-Abra `https://ecg.henrique.rezends.com.br`. A primeira carga demora (baixa as
-bibliotecas); depois fica em cache. Teste com os exemplos embutidos — há um
-laudo de 12 derivações e três sinais digitais prontos.
+Abra o site. A primeira carga demora (baixa as bibliotecas de cálculo do CDN);
+depois fica em cache. Teste com os exemplos embutidos — há um laudo de 12
+derivações e três sinais digitais prontos.
 
 ---
 
