@@ -30,6 +30,31 @@ function progresso(pct, texto) {
   if (texto) $("carregando-status").textContent = texto;
 }
 
+// Busca um arquivo do motor pela impressão digital do seu conteúdo.
+//
+// Com hash: a URL identifica aquela versão exata, então guardá-la em cache para
+// sempre é seguro — conteúdo novo tem URL nova. Sem hash: não há como saber se
+// o que está em cache ainda vale, então revalida na rede. Melhor lento que
+// desatualizado, e a decisão é por arquivo: um hash faltando não pode arrastar
+// os outros de volta ao cache eterno.
+function buscar(arquivo, hash) {
+  if (!hash) console.warn(`sem impressão digital de ${arquivo}: revalidando na rede`);
+  return fetch(hash ? `${arquivo}?v=${hash}` : arquivo,
+               { cache: hash ? "force-cache" : "no-cache" });
+}
+
+// Impressão digital do motor publicado. É um arquivo minúsculo e é buscado sem
+// cache justamente para ser a única coisa que precisa estar sempre em dia.
+async function versaoDoMotor() {
+  try {
+    const r = await fetch("versao.json", { cache: "no-store" });
+    if (r.ok) return await r.json();
+  } catch (e) {
+    console.warn("versao.json indisponível; o motor será revalidado na rede:", e);
+  }
+  return null;
+}
+
 async function iniciar() {
   try {
     progresso(3, "carregando o interpretador Python…");
@@ -59,17 +84,25 @@ async function iniciar() {
     }
 
     progresso(85, "carregando o motor de análise…");
-    const zip = await (await fetch("cardiolaudo.zip", { cache: "force-cache" })).arrayBuffer();
+    // O zip do motor (680 kB) e a ponte Python ficam em cache entre visitas,
+    // senão seriam rebaixados a cada acesso. Mas guardar sob a URL fixa prende
+    // quem já visitou o site à versão antiga para sempre: o cache nunca mais
+    // consulta a rede. Por isso a URL leva o hash do conteúdo — motor novo é
+    // URL nova, motor igual continua vindo do cache.
+    const versao = await versaoDoMotor();
+
+    const zip = await (await buscar("cardiolaudo.zip", versao?.motor)).arrayBuffer();
     py.FS.mkdirTree("/cardiolaudo");
     await py.unpackArchive(zip, "zip", { extractDir: "/cardiolaudo" });
     // O NeuroKit2 vai no zip junto com o motor; precisa estar no path de módulos.
     py.runPython(`import sys; sys.path.insert(0, "/cardiolaudo")`);
 
     progresso(93, "preparando a análise…");
-    const ponte = await (await fetch("analise.py", { cache: "force-cache" })).text();
+    const ponte = await (await buscar("analise.py", versao?.ponte)).text();
     py.runPython(ponte);
 
     const diag = JSON.parse(py.runPython("diagnostico()"));
+    diag.motor = versao?.motor ?? "sem impressão (revalidado na rede)";
     console.log("CardioLaudo — ambiente:", diag);
     $("engine-badge").textContent = `Python ${diag.python} · no navegador`;
     $("ver").textContent = `NumPy ${diag.numpy} · NeuroKit2 ${diag.neurokit2} · OpenCV ${diag.opencv}`;

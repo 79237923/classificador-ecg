@@ -42,6 +42,29 @@ jobs:
           test -f web/cardiolaudo.zip || { echo "pacote não gerado"; exit 1; }
           ls -lh web/
 
+      # O navegador guarda o motor em cache permanente sob uma URL que carrega a
+      # impressão digital do conteúdo. Se a impressão publicada não corresponder
+      # aos bytes publicados, quem já visitou o site fica preso na versão antiga
+      # sem qualquer sinal de erro. Falhar aqui é a única defesa contra isso.
+      - name: Conferir as impressões digitais do motor
+        run: |
+          python - <<'PY'
+          import hashlib, json, pathlib, sys
+
+          web = pathlib.Path("web")
+          arquivo = web / "versao.json"
+          if not arquivo.exists():
+              sys.exit("versao.json não foi gerado")
+
+          versao = json.loads(arquivo.read_text(encoding="utf-8"))
+          for chave, nome in (("motor", "cardiolaudo.zip"), ("ponte", "analise.py")):
+              real = hashlib.sha256((web / nome).read_bytes()).hexdigest()[:12]
+              if versao.get(chave) != real:
+                  sys.exit(f"{nome}: versao.json diz {versao.get(chave)!r}, "
+                           f"o conteúdo publicado é {real!r}")
+          print("impressões digitais conferem:", versao)
+          PY
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

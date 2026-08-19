@@ -38,3 +38,6 @@ models/*.pt
 # O pacote da versão web é gerado por scripts/build_web.py — inclusive no CI,
 # para nunca ficar defasado em relação ao backend/ que o origina.
 web/cardiolaudo.zip
+# Impressão digital do pacote, gerada junto com ele. Commitá-la só criaria uma
+# cópia capaz de divergir do conteúdo que descreve.
+web/versao.json

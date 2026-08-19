@@ -14,6 +14,8 @@ Uso:
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import shutil
 import sys
 import zipfile
@@ -22,6 +24,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 BUNDLE = WEB / "cardiolaudo.zip"
+PONTE = WEB / "analise.py"
+VERSAO = WEB / "versao.json"
 
 # Só os módulos de análise. Ficam de fora: auth (não há servidor), main.py
 # (API), retention/purge/scheduler (persistência) — nada disso faz sentido
@@ -62,6 +66,25 @@ def adicionar_arvore(zf: zipfile.ZipFile, raiz: Path, prefixo: str) -> int:
     return n
 
 
+def impressao(caminho: Path) -> str:
+    """Hash curto do conteúdo, usado para invalidar o cache do navegador."""
+    return hashlib.sha256(caminho.read_bytes()).hexdigest()[:12]
+
+
+def gravar_versao() -> dict[str, str]:
+    """Publica a impressão digital do motor.
+
+    O navegador guarda o zip (680 kB) e a ponte Python em cache entre visitas,
+    porque baixá-los a cada acesso seria desperdício. O preço disso é que, sem
+    trocar a URL, uma atualização nunca chega a quem já visitou o site. Com o
+    hash do conteúdo na query, conteúdo novo vira URL nova — e conteúdo igual
+    continua vindo do cache, de graça.
+    """
+    versao = {"motor": impressao(BUNDLE), "ponte": impressao(PONTE)}
+    VERSAO.write_text(json.dumps(versao, indent=2) + "\n", encoding="utf-8")
+    return versao
+
+
 def localizar_neurokit() -> Path | None:
     """Encontra o NeuroKit2 instalado, seja qual for o sistema.
 
@@ -77,6 +100,12 @@ def localizar_neurokit() -> Path | None:
 
 def main() -> int:
     WEB.mkdir(parents=True, exist_ok=True)
+
+    # Sem a ponte o site não analisa nada. Falhar aqui é melhor que publicar um
+    # versao.json incompleto, que faria o navegador cair no cache sem validade.
+    if not PONTE.exists():
+        print(f"Ponte de análise não encontrada: {PONTE}")
+        return 1
 
     nk_origem = localizar_neurokit()
     if nk_origem is None or not nk_origem.exists():
@@ -120,6 +149,11 @@ def main() -> int:
     print(f"\nExemplos copiados: {len(copiadas)}")
     for nome, rotulo, tam in copiadas:
         print(f"  {nome:<28} {tam / 1024:>7.0f} KB  {rotulo}")
+
+    versao = gravar_versao()
+    print(f"\nImpressão do motor: {versao['motor']}  "
+          f"ponte: {versao.get('ponte', '—')}")
+    print("  (é o que faz uma publicação nova chegar a quem já visitou o site)")
 
     total = sum(f.stat().st_size for f in WEB.rglob("*") if f.is_file())
     print(f"\nTamanho total do site: {total / 1024 / 1024:.1f} MB")
