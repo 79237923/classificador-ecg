@@ -82,7 +82,7 @@ def build_pdf(result: dict) -> bytes:
         x for x in (f"idade {escape(str(paciente['age']))}" if paciente.get("age") else "",
                     f"sexo {escape(str(paciente['sex']))}" if paciente.get("sex") else "") if x)
 
-    el = [Paragraph("Análise automatizada de eletrocardiograma", h1),
+    el = [Paragraph("Análise automatizada de ECG", h1),
           Paragraph(" — ".join(identificacao), small)]
     if source.get("filename"):
         el.append(Paragraph(f"Arquivo: {escape(str(source['filename']))}"

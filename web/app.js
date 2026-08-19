@@ -283,7 +283,7 @@ $("copiar-btn").addEventListener("click", async () => {
   if (!ultimoResultado?.narrativa) return;
   const n = ultimoResultado.narrativa;
   const texto = [
-    `CardioLaudo — análise automatizada de ECG`,
+    `Análise automatizada de ECG`,
     `Arquivo: ${ultimoResultado.arquivo}`,
     "",
     ...n.secoes.map((s) => `${s.titulo}: ${s.texto}`),
